@@ -11,7 +11,7 @@ def speak(text):
 def listen_command():
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Слухаю вас...")
+        print("Слухаю вас....")
         audio = r.listen(source)
     try:
         query = r.recognize_google(audio, language="uk-UA")
