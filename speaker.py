@@ -1,35 +1,36 @@
-import pyttsx3
+import os
+from elevenlabs.client import ElevenLabs
 
-def initialize_engine():
-    """Налаштовує двигун синтезу мовлення."""
-    engine = pyttsx3.init()
-    
-    # Налаштування швидкості мовлення (за замовчуванням 200, краще 170-180)
-    engine.setProperty('rate', 170)
-    
-    # Налаштування гучності (0.0 до 1.0)
-    engine.setProperty('volume', 1.0)
-    
-    return engine
+# Ініціалізація клієнта
+client = ElevenLabs(
+    api_key="sk_e0f3182818b7efae5aace0926793f976bb5ce9b7ba441130"
+)
 
 def speak(text):
-    """Функція, яка змушує асистента говорити."""
-    engine = initialize_engine()
-    
-    # Вибір голосу (опціонально)
-    # В Linux espeak має специфічні голоси, за замовчуванням вибере системний
-    voices = engine.getProperty('voices')
-    
-    # Спробуємо знайти український голос, якщо він встановлений в системі
-    for voice in voices:
-        if "ukrainian" in voice.name.lower():
-            engine.setProperty('voice', voice.id)
-            break
-            
     print(f"Сієста: {text}")
-    engine.say(text)
-    engine.runAndWait()
+    
+    try:
+        audio_generator = client.text_to_speech.convert(
+            text=text,
+            voice_id="EXAVITQu4vr4xnSDxMaL", # ID голосу Sarah
+            model_id="eleven_multilingual_v2"
+        )
+        
+        # Зберігаємо аудіо у файл
+        filename = "siesta_voice.mp3"
+        with open(filename, "wb") as f:
+            for chunk in audio_generator:
+                f.write(chunk)
+        
+        # Відтворення через mpg123
+        # Додаємо 2>/dev/null, щоб прибрати помилки ALSA з екрана
+        os.system(f"mpg123 -q {filename} 2>/dev/null")
+        
+        if os.path.exists(filename):
+            os.remove(filename)
+            
+    except Exception as e:
+        print(f"Помилка ElevenLabs: {e}")
 
-# Цей блок спрацює тільки якщо ти запустиш цей файл напряму
 if __name__ == "__main__":
-    speak("Привіт! Я твій голосовий помічник. Система готова до роботи.")
+    speak("Тепер я використовую оновлений метод генерації. Все має працювати!")
